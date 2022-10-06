@@ -4,11 +4,11 @@ import random
 from utils import *
 
 
-class PairedDataset(Dataset):
-    def __init__(self, domain1, domain2, train_size, train=True, transform=None):
-        super(PairedDataset, self).__init__()
+class TranslationDataset(Dataset):
+    def __init__(self, domain1, domain2, domain1_size, domain2_size, train=True, transform=None):
+        super(TranslationDataset, self).__init__()
 
-        img_dir = '../all_datasets/'
+        img_dir = '../datasets/'
         domain1_dir = os.path.join(img_dir, domain1)
         domain2_dir = os.path.join(img_dir, domain2)
         if train:
@@ -18,14 +18,17 @@ class PairedDataset(Dataset):
             domain1_dir = os.path.join(domain1_dir, 'test')
             domain2_dir = os.path.join(domain2_dir, 'test')
 
-        self.domain1_paths = sorted(make_dataset(domain1_dir))[:train_size]
-        self.domain2_paths = sorted(make_dataset(domain2_dir))[:train_size]
+        self.domain1_size = domain1_size
+        self.domain2_size = domain2_size
+
+        self.domain1_paths = sorted(make_dataset(domain1_dir))[:domain1_size]
+        self.domain2_paths = sorted(make_dataset(domain2_dir))[:domain2_size]
 
         self.transform = transform
 
     def __getitem__(self, index):
-        domain1_path = self.domain1_paths[index % len(self.domain1_paths)]
-        domain2_path = self.domain2_paths[random.randint(0, len(self.domain2_paths)-1)]
+        domain1_path = self.domain1_paths[random.randrange(self.domain1_size)]
+        domain2_path = self.domain2_paths[random.randrange(self.domain2_size)]
 
         domain1_numpy = cv2.cvtColor(cv2.imread(domain1_path), cv2.COLOR_BGR2RGB)
         domain2_numpy = cv2.cvtColor(cv2.imread(domain2_path), cv2.COLOR_BGR2RGB)
