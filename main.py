@@ -4,7 +4,7 @@ from train import TrainCycleGAN
 # Arguments
 parser = argparse.ArgumentParser(description='Train CycleGAN')
 
-parser.add_argument('--exp_detail', default='Finetune StyleGAN', type=str)
+parser.add_argument('--exp_detail', default='Train CycleGAN', type=str)
 parser.add_argument('--gpu_num', type=int, default=0)
 parser.add_argument('--seed', default=100, type=int)
 
