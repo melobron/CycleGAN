@@ -22,7 +22,8 @@ parser.add_argument('--batch_size', type=int, default=50)
 
 # Dataset
 parser.add_argument('--dir1', type=str, default='../datasets/FFHQ/test')
-parser.add_argument('--dir2', type=str, default='./results/?')
+parser.add_argument('--dir2', type=str, default='./experiments/exp3/results/fake_FFHQ')
+# parser.add_argument('--dir2', type=str, default='../datasets/Dog/test')
 
 # InceptionV3 Network
 """ Build Pretrained InceptionV3 (Input: 299 x 299 x 3)
@@ -100,7 +101,7 @@ def calculate_frechet_distance(mu1, sigma1, mu2, sigma2, eps=1e-6):
 
     # Check if singular
     covmean, _ = linalg.sqrtm(sigma1.dot(sigma2), disp=False)
-    if not np.isinfinite(covmean).all():
+    if not np.isfinite(covmean).all():
         print('FID calculation produces singular product, adding {} to diagonal of cov estimates'.format(eps))
         offset = np.eye(sigma1.shape[0]) * eps
         covmean = linalg.sqrtm((sigma1 + offset).dot(sigma2 + offset))
@@ -127,9 +128,7 @@ def Evaluate_FID(args):
     np.random.seed(opt.seed)
 
     # Model
-    model = InceptionV3(output_blocks=args.output_blocks, resize_input=args.resize_input,
-                        normalize_input=args.normalize_input, requires_grad=args.requires_grad,
-                        use_fid_inception=args.use_fid_inception)
+    model = InceptionV3(output_blocks=args.output_blocks, requires_grad=args.requires_grad, use_fid_inception=args.use_fid_inception)
 
     transform = transforms.Compose([
         transforms.ToTensor(),
@@ -139,7 +138,7 @@ def Evaluate_FID(args):
 
     mu1, sigma1 = compute_activation_statistics(model=model, device=device, img_dir=args.dir1, transform=transform,
                                                 batch_size=args.batch_size, output_block=args.output_blocks[0])
-    mu2, sigma2 = compute_activation_statistics(model=model, device=device, img_dir=args.dir2s, transform=transform,
+    mu2, sigma2 = compute_activation_statistics(model=model, device=device, img_dir=args.dir2, transform=transform,
                                                 batch_size=args.batch_size, output_block=args.output_blocks[0])
 
     fid_value = calculate_frechet_distance(mu1=mu1, sigma1=sigma1, mu2=mu2, sigma2=sigma2)
@@ -148,4 +147,5 @@ def Evaluate_FID(args):
 
 
 if __name__ == "__main__":
-    Evaluate_FID(args=opt)
+    fid_value = Evaluate_FID(args=opt)
+    print('FID: {}'.format(fid_value))
