@@ -30,17 +30,6 @@ class TrainCycleGAN:
         random.seed(args.seed)
         np.random.seed(args.seed)
 
-        # Models
-        self.netG_A2B = Generator().to(self.device)
-        self.netG_B2A = Generator().to(self.device)
-        self.netD_A = Discriminator().to(self.device)
-        self.netD_B = Discriminator().to(self.device)
-
-        self.netG_A2B.apply(weights_init_normal)
-        self.netG_B2A.apply(weights_init_normal)
-        self.netD_A.apply(weights_init_normal)
-        self.netD_B.apply(weights_init_normal)
-
         # Training Parameters
         self.n_epochs = args.n_epochs
         self.offset_epochs = args.offset_epochs
@@ -61,6 +50,17 @@ class TrainCycleGAN:
         self.alpha = args.GAN_loss_alpha
         self.beta = args.cycle_loss_beta
         self.gamma = args.identity_loss_gamma
+
+        # Models
+        self.netG_A2B = Generator().to(self.device)
+        self.netG_B2A = Generator().to(self.device)
+        self.netD_A = Discriminator().to(self.device)
+        self.netD_B = Discriminator().to(self.device)
+
+        self.netG_A2B.apply(weights_init_normal)
+        self.netG_B2A.apply(weights_init_normal)
+        self.netD_A.apply(weights_init_normal)
+        self.netD_B.apply(weights_init_normal)
 
         # Loss
         self.criterion_GAN = torch.nn.MSELoss()
@@ -134,7 +134,7 @@ class TrainCycleGAN:
                     real_A, real_B = data['domain1'], data['domain2']
                     real_A, real_B = real_A.to(self.device), real_B.to(self.device)
 
-                    ########### Update D ###########
+                    ########### Update G ###########
                     self.optimizer_G.zero_grad()
 
                     # GAN Loss
@@ -224,3 +224,4 @@ class TrainCycleGAN:
                 torch.save(self.netG_A2B.state_dict(), os.path.join(self.checkpoint_dir, 'netG_A2B_{}epochs.pth'.format(epoch)))
                 torch.save(self.netG_B2A.state_dict(), os.path.join(self.checkpoint_dir, 'netG_B2A_{}epochs.pth'.format(epoch)))
 
+        self.summary.close()

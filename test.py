@@ -49,12 +49,12 @@ def reverse(args, tensor):
 
 def Test_CycleGAN(args):
     # Device
-    device = torch.device('cuda:{}'.format(opt.gpu_num))
+    device = torch.device('cuda:{}'.format(args.gpu_num))
 
     # Random Seeds
-    torch.manual_seed(opt.seed)
-    random.seed(opt.seed)
-    np.random.seed(opt.seed)
+    torch.manual_seed(args.seed)
+    random.seed(args.seed)
+    np.random.seed(args.seed)
 
     netG_A2B = Generator().to(device)
     netG_B2A = Generator().to(device)
@@ -63,22 +63,22 @@ def Test_CycleGAN(args):
     netG_B2A.eval()
 
     netG_A2B.load_state_dict(torch.load('./experiments/exp{}/checkpoints/netG_A2B_{}epochs.pth'.format(
-        opt.exp_num, opt.n_epochs), map_location=device))
+        args.exp_num, args.n_epochs), map_location=device))
     netG_B2A.load_state_dict(torch.load('./experiments/exp{}/checkpoints/netG_B2A_{}epochs.pth'.format(
-        opt.exp_num, opt.n_epochs), map_location=device))
+        args.exp_num, args.n_epochs), map_location=device))
 
-    test_transform = transforms.Compose(get_transforms(opt))
+    test_transform = transforms.Compose(get_transforms(args))
 
-    testA_dir = '../datasets/{}/test'.format(opt.domain1)
-    testB_dir = '../datasets/{}/test'.format(opt.domain2)
+    testA_dir = '../datasets/{}/test'.format(args.domain1)
+    testB_dir = '../datasets/{}/test'.format(args.domain2)
     testA_paths = make_dataset(testA_dir)
     testB_paths = make_dataset(testB_dir)
 
-    save_dir = './experiments/exp{}/results/'.format(opt.exp_num)
-    AtoB_dir = os.path.join(save_dir, '{}to{}'.format(opt.domain1, opt.domain2))
-    BtoA_dir = os.path.join(save_dir, '{}to{}'.format(opt.domain2, opt.domain1))
-    fakeA_dir = os.path.join(save_dir, 'fake_{}'.format(opt.domain1))
-    fakeB_dir = os.path.join(save_dir, 'fake_{}'.format(opt.domain2))
+    save_dir = './experiments/exp{}/results/'.format(args.exp_num)
+    AtoB_dir = os.path.join(save_dir, '{}to{}'.format(args.domain1, args.domain2))
+    BtoA_dir = os.path.join(save_dir, '{}to{}'.format(args.domain2, args.domain1))
+    fakeA_dir = os.path.join(save_dir, 'fake_{}'.format(args.domain1))
+    fakeB_dir = os.path.join(save_dir, 'fake_{}'.format(args.domain2))
 
     for d in [AtoB_dir, BtoA_dir, fakeA_dir, fakeB_dir]:
         if not os.path.exists(d):
@@ -94,8 +94,8 @@ def Test_CycleGAN(args):
             fake_B = netG_A2B(real_A)
             AtoB = torch.cat([real_A, fake_B], dim=3)
 
-            fake_B = reverse(opt, fake_B)
-            AtoB = reverse(opt, AtoB)
+            fake_B = reverse(args, fake_B)
+            AtoB = reverse(args, AtoB)
 
             if index < 10:
                 cv2.imwrite(os.path.join(AtoB_dir, '{}.png'.format(index+1)), AtoB)
@@ -113,8 +113,8 @@ def Test_CycleGAN(args):
             fake_A = netG_B2A(real_B)
             BtoA = torch.cat([real_B, fake_A], dim=3)
 
-            fake_A = reverse(opt, fake_A)
-            BtoA = reverse(opt, BtoA)
+            fake_A = reverse(args, fake_A)
+            BtoA = reverse(args, BtoA)
 
             if index < 10:
                 cv2.imwrite(os.path.join(BtoA_dir, '{}.png'.format(index+1)), BtoA)
